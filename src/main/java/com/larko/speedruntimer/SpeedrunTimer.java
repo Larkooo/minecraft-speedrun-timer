@@ -1,6 +1,7 @@
 package com.larko.speedruntimer;
 
 import com.larko.speedruntimer.events.ModClientEvents;
+import com.larko.speedruntimer.util.Utilities;
 import net.minecraft.block.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -33,9 +34,9 @@ public class SpeedrunTimer {
     private void setup(final FMLCommonSetupEvent event)
     {
         // some preinit code
+        Utilities.initDiscord();
         LOGGER.info("HELLO FROM PREINIT");
         LOGGER.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
-        DiscordRichPresence rich = new DiscordRichPresence.Builder("This is the current state.").setDetails("These are some details.").build();
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
