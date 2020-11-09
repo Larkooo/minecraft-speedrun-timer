@@ -13,7 +13,7 @@
 
 - Choose type of speedrun (coming soon)
 
-- Discord rich presence showing your progress (coming soon)
+- Discord rich presence showing your progress
 
 
 ![show1](http://sc.aymdj.me/hbs3994y.png)
