@@ -3,6 +3,8 @@ package com.larko.speedruntimer.events;
 import com.larko.speedruntimer.SpeedrunTimer;
 import com.larko.speedruntimer.util.Utilities;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import net.arikia.dev.drpc.DiscordRPC;
+import net.arikia.dev.drpc.DiscordRichPresence;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
@@ -11,21 +13,20 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.RegistryKey;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.Date;
-import java.util.TreeMap;
+import java.util.LinkedHashMap;
+
 
 @Mod.EventBusSubscriber(modid= SpeedrunTimer.MOD_ID, bus=Mod.EventBusSubscriber.Bus.FORGE, value= Dist.CLIENT)
 public class ModClientEvents {
@@ -36,7 +37,18 @@ public class ModClientEvents {
 
     public static String actualDimension;
 
-    public static TreeMap<String, Long> steps = new TreeMap<String, Long>();
+    public static LinkedHashMap<String, Long> steps = new LinkedHashMap<String, Long>();
+
+    public static void startSpeedrun() {
+        startTime = new Date().getTime();
+        DiscordRichPresence rich = new DiscordRichPresence.Builder("No steps accomplished yet")
+                .setDetails("Dimension : " + actualDimension)
+                .setStartTimestamps(startTime)
+                .setBigImage("mc", "Made with love by Larko")
+                .setSmallImage("clock", "Speedrunning")
+                .build();
+        DiscordRPC.discordUpdatePresence(rich);
+    }
 
     @SubscribeEvent
     public static void onRenderGui(RenderGameOverlayEvent.Text event) {
@@ -56,7 +68,7 @@ public class ModClientEvents {
         matrixStack.pop();
         if(!steps.isEmpty()) {
             String stepsString = "";
-            int y = 31;
+            int y = 28;
             for(String step : steps.keySet()) {
                 fontRenderer.drawStringWithShadow(matrixStack, "[ " + Utilities.readableStep(step) + " : " + Utilities.formatTimer(steps.get(step)) + " ]", 4,y,Integer.parseInt("FFFFFF", 16));
                 y += 10;
@@ -76,20 +88,25 @@ public class ModClientEvents {
         //System.out.println(player.getPosX());
         if ((player.getPosX() - player.prevPosX > 0) || (player.getPosY() - player.prevPosY > 0)) {
             if(startTime == 0)
-                startTime = new Date().getTime();
+                startSpeedrun();
+                SpeedrunTimer.LOGGER.info("player moved, starting speedrun");
         }
     }
 
     @SubscribeEvent
     public static void onPlayerInteract(PlayerInteractEvent event) {
         if(startTime == 0)
-            startTime = new Date().getTime();
+            startSpeedrun();
+            SpeedrunTimer.LOGGER.info("player interacted, starting speedrun");
     }
 
     @SubscribeEvent
     public static void onPlayerQuit(PlayerEvent.PlayerLoggedOutEvent event) {
+        DiscordRPC.discordClearPresence();
         steps.clear();
         startTime = 0L;
+        finishTime = 0L;
+        SpeedrunTimer.LOGGER.info("player logged out, clearing everything");
     }
 
     @SubscribeEvent
@@ -98,6 +115,15 @@ public class ModClientEvents {
         //System.out.println(entity.getName());
         if(entity instanceof EnderDragonEntity) {
             finishTime = new Date().getTime();
+            SpeedrunTimer.LOGGER.info("finished game " + finishTime);
+            DiscordRichPresence rich = new DiscordRichPresence.Builder("Finished the game at " + Utilities.formatTimer(finishTime))
+                    .setDetails("Dimension : " + actualDimension)
+                    .setStartTimestamps(startTime)
+                    .setBigImage("mc", "Made with love by Larko")
+                    .setSmallImage("clock", "Speedrunning")
+                    .build();
+            DiscordRPC.discordUpdatePresence(rich);
+            SpeedrunTimer.LOGGER.info("updated rich presence");
             //System.out.println("yes");
         }
     }
@@ -106,10 +132,13 @@ public class ModClientEvents {
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         RegistryKey<World> dimension = event.getPlayer().world.getDimensionKey();
         if(dimension.compareTo(World.OVERWORLD) == 0) {
+            SpeedrunTimer.LOGGER.info("player logged in, dimension : overworld " );
             actualDimension = "Overworld";
         } else if(dimension.compareTo(World.THE_NETHER) == 0) {
+            SpeedrunTimer.LOGGER.info("player logged in, dimension : nether " );
             actualDimension = "Nether";
         } else {
+            SpeedrunTimer.LOGGER.info("player logged in, dimension : end " );
             actualDimension = "End";
         }
     }
@@ -122,6 +151,8 @@ public class ModClientEvents {
         RegistryKey<World> dimensionFrom = event.getFrom();
         RegistryKey<World> dimensionTo = event.getTo();
 
+        Long currentTimer = new Date().getTime() - startTime;
+
         if(dimensionTo.compareTo(World.OVERWORLD) == 0) {
             actualDimension = "Overworld";
         } else if(dimensionTo.compareTo(World.THE_NETHER) == 0) {
@@ -131,11 +162,35 @@ public class ModClientEvents {
         }
 
         if( (dimensionFrom.compareTo(World.OVERWORLD)) == 0 && (dimensionTo.compareTo(World.THE_NETHER) == 0) ) {
-            steps.put("enterNether", new Date().getTime() - startTime);
+            steps.put("enterNether", currentTimer);
+            DiscordRichPresence rich = new DiscordRichPresence.Builder("Entered Nether at " + Utilities.formatTimer(currentTimer))
+                    .setDetails("Dimension : " + actualDimension)
+                    .setStartTimestamps(startTime)
+                    .setBigImage("mc", "Made with love by Larko")
+                    .setSmallImage("clock", "Speedrunning")
+                    .build();
+            DiscordRPC.discordUpdatePresence(rich);
+            SpeedrunTimer.LOGGER.info("updated rich presence");
         } else if ( (dimensionFrom.compareTo(World.THE_NETHER)) == 0 && (dimensionTo.compareTo(World.OVERWORLD) == 0) ) {
-            steps.put("exitNether", new Date().getTime() - startTime);
+            steps.put("exitNether", currentTimer);
+            DiscordRichPresence rich = new DiscordRichPresence.Builder("Left Nether at " + Utilities.formatTimer(currentTimer))
+                    .setDetails("Dimension : " + actualDimension)
+                    .setStartTimestamps(startTime)
+                    .setBigImage("mc", "Made with love by Larko")
+                    .setSmallImage("clock", "Speedrunning")
+                    .build();
+            DiscordRPC.discordUpdatePresence(rich);
+            SpeedrunTimer.LOGGER.info("updated rich presence");
         } else if ( (dimensionFrom.compareTo(World.OVERWORLD)) == 0 && (dimensionTo.compareTo(World.THE_END) == 0) ) {
-            steps.put("enterEnd", new Date().getTime() - startTime);
+            steps.put("enterEnd", currentTimer);
+            DiscordRichPresence rich = new DiscordRichPresence.Builder("Entered End at " + Utilities.formatTimer(currentTimer))
+                    .setDetails("Dimension : " + actualDimension)
+                    .setStartTimestamps(startTime)
+                    .setBigImage("mc", "Made with love by Larko")
+                    .setSmallImage("clock", "Speedrunning")
+                    .build();
+            DiscordRPC.discordUpdatePresence(rich);
+            SpeedrunTimer.LOGGER.info("updated rich presence");
         }
 
 
