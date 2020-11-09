@@ -17,4 +17,4 @@
 
 
 ![show1](http://sc.aymdj.me/hbs3994y.png)
-![show2](http://sc.aymdj.me/36u6ljj0.png
+![show2](http://sc.aymdj.me/36u6ljj0.png)
