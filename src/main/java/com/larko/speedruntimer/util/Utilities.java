@@ -1,5 +1,9 @@
 package com.larko.speedruntimer.util;
 
+import net.arikia.dev.drpc.DiscordEventHandlers;
+import net.arikia.dev.drpc.DiscordRPC;
+import net.arikia.dev.drpc.DiscordRichPresence;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -26,5 +30,11 @@ public class Utilities {
         } else {
             return "Entered End";
         }
+    }
+
+    public static void initDiscord() {
+        DiscordEventHandlers handlers = new DiscordEventHandlers.Builder().setReadyEventHandler((user) -> System.out.println(user.username)).build();
+        DiscordRPC.discordInitialize("775406152619393115", handlers, false);
+        //DiscordRPC.discordRegister("775406152619393115", "");
     }
 }
