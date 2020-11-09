@@ -45,7 +45,7 @@ public class ModClientEvents {
                 .setDetails("Dimension : " + actualDimension)
                 .setStartTimestamps(startTime)
                 .setBigImage("mc", "Made with love by Larko")
-                .setSmallImage("clock", "Speedrunning")
+                .setSmallImage("clockicon", "Speedrunning")
                 .build();
         DiscordRPC.discordUpdatePresence(rich);
     }
@@ -120,7 +120,7 @@ public class ModClientEvents {
                     .setDetails("Dimension : " + actualDimension)
                     .setStartTimestamps(startTime)
                     .setBigImage("mc", "Made with love by Larko")
-                    .setSmallImage("clock", "Speedrunning")
+                    .setSmallImage("clockicon", "Speedrunning")
                     .build();
             DiscordRPC.discordUpdatePresence(rich);
             SpeedrunTimer.LOGGER.info("updated rich presence");
@@ -167,7 +167,7 @@ public class ModClientEvents {
                     .setDetails("Dimension : " + actualDimension)
                     .setStartTimestamps(startTime)
                     .setBigImage("mc", "Made with love by Larko")
-                    .setSmallImage("clock", "Speedrunning")
+                    .setSmallImage("clockicon", "Speedrunning")
                     .build();
             DiscordRPC.discordUpdatePresence(rich);
             SpeedrunTimer.LOGGER.info("updated rich presence");
@@ -177,7 +177,7 @@ public class ModClientEvents {
                     .setDetails("Dimension : " + actualDimension)
                     .setStartTimestamps(startTime)
                     .setBigImage("mc", "Made with love by Larko")
-                    .setSmallImage("clock", "Speedrunning")
+                    .setSmallImage("clockicon", "Speedrunning")
                     .build();
             DiscordRPC.discordUpdatePresence(rich);
             SpeedrunTimer.LOGGER.info("updated rich presence");
@@ -187,7 +187,7 @@ public class ModClientEvents {
                     .setDetails("Dimension : " + actualDimension)
                     .setStartTimestamps(startTime)
                     .setBigImage("mc", "Made with love by Larko")
-                    .setSmallImage("clock", "Speedrunning")
+                    .setSmallImage("clockicon", "Speedrunning")
                     .build();
             DiscordRPC.discordUpdatePresence(rich);
             SpeedrunTimer.LOGGER.info("updated rich presence");
