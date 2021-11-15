@@ -1,7 +1,7 @@
 # minecraft-speedrun-timer
 ## Extremely efficient speedrun timer mod for minecraft using events 
 
-![show0](http://sc.aymdj.me/cdn/p85tuy4n.png) ![rich](http://sc.aymdj.me/cdn/dlp9tvrn.png)
+![show0](https://ibb.co/Bt29km3)
 
 ### With this mod, you can : 
 
